@@ -1,0 +1,36 @@
+# Ignore data directories
+data/
+Results/
+results/
+
+# Ignore common data file types
+*.csv
+*.tsv
+*.json
+*.xml
+*.yaml
+*.yml
+*.xls
+*.xlsx
+*.parquet
+*.feather
+*.hdf5
+*.h5
+*.npy
+*.npz
+*.sav
+*.dta
+*.mat
+*.mp4
+
+# Ignore large text files
+*.txt
+*.log
+
+# Ignore backup or temp files
+*.bak
+*.tmp
+*.temp
+
+# If using Jupyter or Python notebooks, ignore notebook checkpoints
+.ipynb_checkpoints/
