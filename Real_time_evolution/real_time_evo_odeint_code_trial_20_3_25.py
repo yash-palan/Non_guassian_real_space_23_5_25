@@ -11,7 +11,7 @@ This code contains the code that will
 #########################################
 from ast import Del
 import gc
-import h5py
+# import h5py
 import torch
 import numpy as np
 from Real_time_evolution import real_time_evolution_functions_20_3_25 as rtef
@@ -139,7 +139,9 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
                             input_variables,
                             computed_variables_instance,
                             correlation_matrices)
-    print(" Energy expectation value:",phase_time_derivative)
+    with open('data/total_energy.dat','a') as file:
+        file.write(str(phase_time_derivative.item().real)+'\n')
+    print(" Energy expectation value:",phase_time_derivative,'\n')
     time_derivative_lambda= rtef.equation_of_motion_for_Non_Gaussian_parameter(delta_R,Gamma_b,Gamma_m,
                                                                                 input_variables,
                                                                                 computed_variables_instance,

@@ -58,19 +58,48 @@ def energy_expectation_value(delta_r_tensor:torch.Tensor,Gamma_b_tensor:torch.Te
         raise Exception("Gamma_b is not a complex numpy array. Please check the computation of the energy expectation value.")
 
     # Correlation matrix creation functions (assumed to be globally stored from now on)
-    c_dagger_c_mat = correlation_matrices.c_c_dagger_mat
+    # c_dagger_c_mat = correlation_matrices.c_c_dagger_mat
+    c_dagger_c_mat = correlation_matrices.c_dagger_c_mat
     c_dagger_c_dagger_mat = correlation_matrices.c_dagger_c_dagger_mat
     c_c_mat = correlation_matrices.c_c_mat
 
+    phonon_energy = 1/4.0* torch.einsum('i,ij,j->',delta_r_tensor,omega_bar_matrix,delta_r_tensor) + 1/4.0*torch.trace(omega_bar_matrix@Gamma_b_tensor)- 1/4.0 *torch.sum(torch.diag(omega_bar_matrix)) 
+
+    electron_kinetic_energy = (torch.einsum('ij,ij->',J_i_j_matrix,c_dagger_c_mat) - torch.einsum('i,ii->',chemical_potential, c_dagger_c_mat) )
+    
+    electron_electron_interaction_energy = (0.5*torch.einsum('ij,ii,jj->',Ve_i_J_matrix,c_dagger_c_mat,c_dagger_c_mat)
+                                            - 0.5*torch.einsum('ij,ij,ji->',Ve_i_J_matrix,c_dagger_c_mat,c_dagger_c_mat)
+                                            + 0.5*torch.einsum('ij,ij,ji->',Ve_i_J_matrix,c_dagger_c_dagger_mat,c_c_mat))
+    
+    electron_phonon_interaction_energy = torch.einsum('ki,k,i->',delta_gamma_tilde_matrix,delta_r_tensor,torch.diag(c_dagger_c_mat)) 
+    print(" Phonon energy: ",phonon_energy)
+    print(" Electron kinetic energy: ",electron_kinetic_energy)
+    print(" Electron electron interaction energy: ",electron_electron_interaction_energy)
+    print(" Electron phonon interaction energy: ",electron_phonon_interaction_energy)
+
+    with open('data/phonon_energy.dat','a') as file:
+        file.write(str(phonon_energy.item().real)+'\n')
+
+    with open('data/electron_kinetic_energy.dat','a') as file:
+        file.write(str(electron_kinetic_energy.item().real)+'\n')
+    
+    with open('data/electron_electron_interaction_energy.dat','a') as file:
+        file.write(str(electron_electron_interaction_energy.item().real)+'\n')
+
+    with open('data/electron_phonon_interaction_energy.dat','a') as file:
+        file.write(str(electron_phonon_interaction_energy.item().real)+'\n')
+
     # Computing of the energy expectation value
-    val = (torch.einsum('ij,ij->',J_i_j_matrix,c_dagger_c_mat) - torch.einsum('i,ii->',chemical_potential, c_dagger_c_mat) 
-           + 1/4.0* torch.einsum('i,ij,j->',delta_r_tensor,omega_bar_matrix,delta_r_tensor) + 1/4.0*torch.trace(omega_bar_matrix@Gamma_b_tensor)
-           + torch.einsum('ki,k,i->',delta_gamma_tilde_matrix,delta_r_tensor,torch.diag(c_dagger_c_mat)) 
-           + 0.5*torch.einsum('ij,ii,jj->',Ve_i_J_matrix,c_dagger_c_mat,c_dagger_c_mat)
-           - 0.5*torch.einsum('ij,ij,ji->',Ve_i_J_matrix,c_dagger_c_mat,c_dagger_c_mat)
-           + 0.5*torch.einsum('ij,ij,ji->',Ve_i_J_matrix,c_dagger_c_dagger_mat,c_c_mat)
-           - 1/4.0 *torch.sum(torch.diag(omega_bar_matrix))     # This is the constant energy sgift term. However, it becomes essential to get this correct for the phase shoft and hence check this once again
-           )
+    # val = (torch.einsum('ij,ij->',J_i_j_matrix,c_dagger_c_mat) - torch.einsum('i,ii->',chemical_potential, c_dagger_c_mat) 
+    #        + 1/4.0* torch.einsum('i,ij,j->',delta_r_tensor,omega_bar_matrix,delta_r_tensor) + 1/4.0*torch.trace(omega_bar_matrix@Gamma_b_tensor)
+    #        + torch.einsum('ki,k,i->',delta_gamma_tilde_matrix,delta_r_tensor,torch.diag(c_dagger_c_mat)) 
+    #        + 0.5*torch.einsum('ij,ii,jj->',Ve_i_J_matrix,c_dagger_c_mat,c_dagger_c_mat)
+    #        - 0.5*torch.einsum('ij,ij,ji->',Ve_i_J_matrix,c_dagger_c_mat,c_dagger_c_mat)
+    #        + 0.5*torch.einsum('ij,ij,ji->',Ve_i_J_matrix,c_dagger_c_dagger_mat,c_c_mat)
+    #        - 1/4.0 *torch.sum(torch.diag(omega_bar_matrix))     # This is the constant energy shift term. However, it becomes essential to get this correct for the phase shift and hence check this once again
+    #        )
+    val = phonon_energy + electron_kinetic_energy + electron_electron_interaction_energy + electron_phonon_interaction_energy
+
     if(val.shape == (1,)):
         raise Exception("The energy expectation value is not a single value. Please check the computation of the energy expectation value.")
     
