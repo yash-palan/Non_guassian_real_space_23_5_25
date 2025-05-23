@@ -72,11 +72,15 @@ def energy_expectation_value(delta_r_tensor:torch.Tensor,Gamma_b_tensor:torch.Te
                                             + 0.5*torch.einsum('ij,ij,ji->',Ve_i_J_matrix,c_dagger_c_dagger_mat,c_c_mat))
     
     electron_phonon_interaction_energy = torch.einsum('ki,k,i->',delta_gamma_tilde_matrix,delta_r_tensor,torch.diag(c_dagger_c_mat)) 
-    print(" Phonon energy: ",phonon_energy)
-    print(" Electron kinetic energy: ",electron_kinetic_energy)
-    print(" Electron electron interaction energy: ",electron_electron_interaction_energy)
-    print(" Electron phonon interaction energy: ",electron_phonon_interaction_energy)
-
+    # print(" Phonon energy: ",phonon_energy)
+    # print(" Electron kinetic energy: ",electron_kinetic_energy)
+    # print(" Electron electron interaction energy: ",electron_electron_interaction_energy)
+    # print(" Electron phonon interaction energy: ",electron_phonon_interaction_energy)
+    cdf.log_and_print(" Phonon energy: "+str(phonon_energy))
+    cdf.log_and_print(" Electron kinetic energy: "+str(electron_kinetic_energy))
+    cdf.log_and_print(" Electron electron interaction energy: "+str(electron_electron_interaction_energy))
+    cdf.log_and_print(" Electron phonon interaction energy: "+str(electron_phonon_interaction_energy))
+    
     with open('data/phonon_energy.dat','a') as file:
         file.write(str(phonon_energy.item().real)+'\n')
 
@@ -423,7 +427,8 @@ def rhs_var_par_eqn_of_motion_lambda_real_time(delta_r:torch.Tensor,Gamma_b:torc
         raise Exception("We get a NaN or an Inf in the final matrix. Please check the computation of the matrix.")
     
     if(torch.any(final_mat[:,N_b:].real>1e-10)):
-        print(" Warning: The lambda_x part is non zero. Max Difference is : ", torch.max(final_mat[:,N_b:].real))
+        cdf.log_and_print(" Warning: The lambda_x part is non zero. Max Difference is : "+str(torch.max(final_mat[:,N_b:].real)))
+        # print(" Warning: The lambda_x part is non zero. Max Difference is : ", torch.max(final_mat[:,N_b:].real))
         # if(torch.any(final_mat[:,N_b:].real>1e-4)):
         #     raise Exception(" The real part of the lambda_x part is too large. Please check the computation of the matrix.")
     # Note that I don't have an equation of motion for \lambda^{x}_{l,m\sigma} (which it might have)

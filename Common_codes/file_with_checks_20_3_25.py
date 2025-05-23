@@ -6,8 +6,10 @@ Created on Wed Nov 29 19:41:53 2023
 """
 ############################################
 ############################################
+from math import log
 import numpy as np
 import torch
+from Common_codes.class_defn_file_20_3_25 import log_and_print
 ############################################
 ############################################
 def sigma(N_b):
@@ -41,19 +43,22 @@ def check_majorana_covariance_matrix(Gamma_m: torch.Tensor):
     max_deviation_pure_state = torch.max(torch.abs(torch.matmul(Gamma_m, Gamma_m) + torch.eye(len(Gamma_m), dtype=Gamma_m.dtype)) )
     if max_deviation_pure_state > 1e-4:
         max_index = torch.argmax(torch.abs(torch.matmul(Gamma_m, Gamma_m) + torch.eye(len(Gamma_m), dtype=Gamma_m.dtype)))
-        print(f"WARNING: Max Gamma_m^2 + I: {max_deviation_pure_state:.1e} at index {max_index}")
+        log_and_print("WARNING: Max Gamma_m^2 + I: " + str(max_deviation_pure_state) + " at index " + str(max_index))
+        # print(f"WARNING: Max Gamma_m^2 + I: {max_deviation_pure_state:.1e} at index {max_index}")
         # raise Exception("The condition for a Pure Fermionic state (Gamma_m^{2} = -I) is not satisfied.")
     # Gamma_m = -Gamma_m^{T}
     max_deviation_anti_symmetry = torch.max(torch.abs(Gamma_m + Gamma_m.T))
     if max_deviation_anti_symmetry > 1e-10:
         max_index_anti_symmetry = torch.argmax(torch.abs(Gamma_m + Gamma_m.T))
-        print(f"WARNING: Max Gamma_m + Gamma_m^T: {max_deviation_anti_symmetry:.1e} at index {max_index_anti_symmetry}")
+        log_and_print("WARNING: Max Gamma_m + Gamma_m^T: " + str(max_deviation_anti_symmetry) + " at index " + str(max_index_anti_symmetry))
+        # print(f"WARNING: Max Gamma_m + Gamma_m^T: {max_deviation_anti_symmetry:.1e} at index {max_index_anti_symmetry}")
         # raise Exception("The condition for the Majorana covariance matrix being Anti-Symmetric is not satisfied.")
     # Gamma_m = real
     max_deviation_real = torch.max(torch.abs(torch.imag(Gamma_m)))
     if max_deviation_real > 1e-10:
         max_index_real = torch.argmax(torch.abs(torch.imag(Gamma_m)))
-        print(f"WARNING: Largest absolute value in the imaginary part of Gamma_m: {max_deviation_real:.1e} at index {max_index_real}")
+        log_and_print("WARNING: Largest absolute value in the imaginary part of Gamma_m: " + str(max_deviation_real) + " at index " + str(max_index_real))
+        # print(f"WARNING: Largest absolute value in the imaginary part of Gamma_m: {max_deviation_real:.1e} at index {max_index_real}")
         # raise Exception("The condition for the Majorana covariance matrix being Real is not satisfied.")
     return
 
@@ -67,21 +72,24 @@ def check_bosonic_quadrature_covariance_matrix(Gamma_b: torch.Tensor):
     max_deviation = torch.max(deviation)
     if max_deviation > 1e-6:
         max_index = torch.argmax(deviation)
-        print(f"WARNING: symplectic condition: {max_deviation:.1e} at index {max_index}")
+        log_and_print("WARNING: symplectic condition: " + str(max_deviation) + " at index " + str(max_index))
+        # print(f"WARNING: symplectic condition: {max_deviation:.1e} at index {max_index}")
         # raise Exception("The condition for the quadrature covariance matrix to be Symplectic is not satisfied.")
     # Gamma_b = Gamma_b^{T}
 
     max_deviation_symmetric = torch.max(torch.abs(Gamma_b.T - Gamma_b))
     if max_deviation_symmetric > 1e-10:
         max_index_symmetric = torch.argmax(torch.abs(Gamma_b.T - Gamma_b))
-        print(f"Largest deviation from symmetric condition: {max_deviation_symmetric:.1e} at index {max_index_symmetric}")
+        log_and_print("WARNING: Largest deviation from symmetric condition: " + str(max_deviation_symmetric) + " at index " + str(max_index_symmetric))
+        # print(f"Largest deviation from symmetric condition: {max_deviation_symmetric:.1e} at index {max_index_symmetric}")
         # raise Exception("The condition for the bosonic quadrature covariance matrix being Symmetric is not satisfied.")
     # Gamma_b = real
     
     max_deviation_real = torch.max(torch.abs(torch.imag(Gamma_b)))
     if max_deviation_real > 1e-10:
         max_index_real = torch.argmax(torch.abs(torch.imag(Gamma_b)))
-        print(f"Largest absolute value in the imaginary part of Gamma_b: {max_deviation_real:1e} at index {max_index_real}")
+        log_and_print("WARNING: Largest absolute value in the imaginary part of Gamma_b: " + str(max_deviation_real) + " at index " + str(max_index_real))
+        # print(f"Largest absolute value in the imaginary part of Gamma_b: {max_deviation_real:1e} at index {max_index_real}")
         # raise Exception("The condition for the bosonic quadrature covariance matrix being Real is not satisfied.")
     
     return
@@ -91,6 +99,7 @@ def check_bosonic_quadrature_average_matrix(Delta_r: torch.Tensor):
     max_imag_delta = torch.max(torch.abs(torch.imag(Delta_r)))
     if max_imag_delta > 1e-10:
         max_index_imag_delta = torch.argmax(torch.abs(torch.imag(Delta_r)))
-        print(f"WARNING: Largest absolute value in the imaginary part of Delta_r: {max_imag_delta:.1e} at index {max_index_imag_delta}")
+        log_and_print("WARNING: Largest absolute value in the imaginary part of Delta_r: " + str(max_imag_delta) + " at index " + str(max_index_imag_delta))
+        # print(f"WARNING: Largest absolute value in the imaginary part of Delta_r: {max_imag_delta:.1e} at index {max_index_imag_delta}")
         # raise Exception("The condition for the bosonic_quadrature_average covariance matrix being Real is not satisfied.")
     return

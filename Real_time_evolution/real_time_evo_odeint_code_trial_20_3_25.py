@@ -11,11 +11,13 @@ This code contains the code that will
 #########################################
 from ast import Del
 import gc
+from math import log
 # import h5py
 import torch
 import numpy as np
 from Real_time_evolution import real_time_evolution_functions_20_3_25 as rtef
 from Common_codes import class_defn_file_20_3_25 as cdf
+from Common_codes.class_defn_file_20_3_25 import log_and_print
 from Common_codes import correlation_functions_file_20_3_25 as cf
 from Common_codes import hamiltonian_derivative_matrices_20_3_25 as hdm
 from Common_codes import file_with_checks_20_3_25 as fwc
@@ -62,7 +64,8 @@ def write_to_excel(filename,data):
 
 def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_variables)->np.ndarray:
     print(" Started time =",t,".")
-    
+    with open('data/jobscript.dat','a') as file:
+        file.write("\n Started time ="+str(t)+".\n")
     # Defining some basic quantities that we use repeatedly in this file N_b and N_f 
     N_b = input_variables.N_b
     N_f = input_variables.N_f
@@ -132,6 +135,8 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
     # start_time = time.time()
     # Equation of motion for lambda_bar
     print(" chemical potential:",input_variables.chemical_potential_val)
+    with open('data/jobscript.dat','a') as file:
+        file.write(" chemical potential:"+str(input_variables.chemical_potential_val)+"\n")
     # start_time = time.time()
     # Equation of motion for lambda_bar
     # Equation of motion for phase_val
@@ -142,6 +147,8 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
     with open('data/total_energy.dat','a') as file:
         file.write(str(phase_time_derivative.item().real)+'\n')
     print(" Energy expectation value:",phase_time_derivative,'\n')
+    with open('data/jobscript.dat','a') as file:
+        file.write(" Energy expectation value:"+str(phase_time_derivative.item().real)+'\n')
     time_derivative_lambda= rtef.equation_of_motion_for_Non_Gaussian_parameter(delta_R,Gamma_b,Gamma_m,
                                                                                 input_variables,
                                                                                 computed_variables_instance,
@@ -149,6 +156,7 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
     if(time_derivative_lambda.dtype !=torch.complex128):
         raise Exception("The time_derivative_lambda is not a complex tensor.")
     
+    log_and_print(" chemical potential:" + str(input_variables.chemical_potential_val))
     # Equation of motion for delta_R
     d_delta_R_dt, phase_contribution_1 = rtef.equation_of_motion_for_bosonic_averages(delta_R,Gamma_b,Gamma_m,
                                                                 time_derivative_lambda,
@@ -189,33 +197,40 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
     # write_to_excel("time_derivative_lambda.xlsx",time_derivative_lambda)
     
     if(torch.any(torch.imag(d_delta_R_dt)>1e-10)):
-        print(" WARNING: There is a large imaginary part in the d_delta_R_dt. Maximum value is:",torch.max(torch.imag(d_delta_R_dt)))
+        # print(" WARNING: There is a large imaginary part in the d_delta_R_dt. Maximum value is:",torch.max(torch.imag(d_delta_R_dt)))
+        log_and_print(" WARNING: There is a large imaginary part in the d_delta_R_dt. Maximum value is:"+str(torch.max(torch.imag(d_delta_R_dt))))
         if(torch.any(torch.imag(d_delta_R_dt)>1e-4)):
             np.save("delta_R_issue.npy",delta_R)
             np.save("Gamma_b_issue.npy",Gamma_b)
             np.save("Gamma_m_issue.npy",Gamma_m)
             np.save("lambda_issue.npy",lambda_bar)
+            log_and_print(" EXCEPTION: The d_delta_R_dt has a large imaginary part.")
             raise Exception("The d_delta_R_dt has a large imaginary part.")
             
     if(torch.any(torch.imag(d_Gamma_b_dt)>1e-10)):
-        print(" WARNING: There is a large imaginary part in the d_Gamma_b_dt. Maximum value is:",torch.max(torch.imag(d_Gamma_b_dt)))
-    
+        # print(" WARNING: There is a large imaginary part in the d_Gamma_b_dt. Maximum value is:",torch.max(torch.imag(d_Gamma_b_dt)))
+        log_and_print(" WARNING: There is a large imaginary part in the d_Gamma_b_dt. Maximum value is:"+str(torch.max(torch.imag(d_Gamma_b_dt))))
+
     if(torch.any(torch.imag(d_Gamma_m_dt)>1e-10)):
-        print(" WARNING: There is a large imaginary part in the d_Gamma_m_dt. Maximum value is:",torch.max(torch.imag(d_Gamma_m_dt)))
+        # print(" WARNING: There is a large imaginary part in the d_Gamma_m_dt. Maximum value is:",torch.max(torch.imag(d_Gamma_m_dt)))
+        log_and_print(" WARNING: There is a large imaginary part in the d_Gamma_m_dt. Maximum value is:"+str(torch.max(torch.imag(d_Gamma_m_dt))))
         if(torch.any(torch.imag(d_Gamma_m_dt)>1e-4)):
             np.save("delta_R_issue.npy",delta_R)
             np.save("Gamma_b_issue.npy",Gamma_b)
             np.save("Gamma_m_issue.npy",Gamma_m)
             np.save("lambda_issue.npy",lambda_bar)
+            log_and_print(" EXCEPTION: The d_delta_R_dt has a large imaginary part.")
             raise Exception("The d_delta_R_dt has a large imaginary part.")
         
     if(torch.any(torch.imag(time_derivative_lambda)>1e-10)):
-        print(" WARNING: There is a large imaginary part in the time_derivative_lambda. Maximum value is:",torch.max(torch.imag(time_derivative_lambda)))
+        # print(" WARNING: There is a large imaginary part in the time_derivative_lambda. Maximum value is:",torch.max(torch.imag(time_derivative_lambda)))
+        log_and_print(" WARNING: There is a large imaginary part in the time_derivative_lambda. Maximum value is:"+str(torch.max(torch.imag(time_derivative_lambda))))
         if(torch.any(torch.imag(time_derivative_lambda)>1e-4)):
             np.save("delta_R_issue.npy",delta_R)
             np.save("Gamma_b_issue.npy",Gamma_b)
             np.save("Gamma_m_issue.npy",Gamma_m)
             np.save("lambda_issue.npy",lambda_bar)
+            log_and_print(" EXCEPTION: The d_delta_R_dt has a large imaginary part.")
             raise Exception("The d_delta_R_dt has a large imaginary part.")
 
     # Taking the real parts since all of the terms are real valued (and so any complex part should be due to numerical errors)
@@ -234,7 +249,7 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
     # dydt = np.concatenate((d_delta_R_dt,d_Gamma_b_dt,d_Gamma_m_dt,time_derivative_lambda_bar))
     dydt = np.concatenate((d_delta_R_dt,d_Gamma_b_dt,d_Gamma_m_dt,time_derivative_lambda_np_array,np.array([phase_time_derivative])))
     gc.collect()
-    
-    print(" Completed time =",t,".\n")
+    log_and_print("Completed time "+str(t))
+    # print(" Completed time =",t,".\n")
 
     return dydt

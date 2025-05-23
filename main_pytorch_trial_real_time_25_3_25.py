@@ -131,7 +131,9 @@ if __name__=="__main__":
     # Here, the gamma we give in is assumed to be normalised with the 1/sqrt{V} factor so that we 
     # work in the computational basis from the start
     # gamma_0 = 0.5*omega_0
-    gamma_0 = 0.1*omega_0
+    # gamma_0 = 0.1*omega_0
+    # gamma_0 = omega_0
+    gamma_0 = 0.6*omega_0
     # gamma_0 = 2*omega_0
     gamma = gamma_0*np.append(np.identity(N_b),np.identity(N_b),axis = 1)
     gamma_tensor = torch.tensor(gamma,dtype=torch.complex128)
@@ -151,30 +153,31 @@ if __name__=="__main__":
 
     # Initial chemical potential value
     # mu_ini = -5.5
-#     mu_ini = -5.1
+    # mu_ini = -5.1
     mu_ini = -5.1
 
     # Final chemical potential value
     # chemical_potential_val = -5.0
     # chemical_potential_val = -4.5
-    # chemical_potential_val = -5.1
     chemical_potential_val = -5.5
+    # chemical_potential_val = -5.5
 
 
     # lmbda = np.append(lmbda_spin_removed,lmbda_spin_removed,axis=1)
     base_path = os.getcwd()
 
-#     complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=70'
-#     complete_path = base_path + '/data/Real time evolution/'
+    # complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=70'
+    # complete_path = base_path + '/data/Real time evolution/'
     # complete_path = base_path +"\\data\\Real time evolution\\omega_0_0.2_J_0\\mu_-5.1_to_-5.5\\gamma_0.5_omega_0\\t=10\\"
-#     filename = complete_path+"/imag_time_evo_final_lambda_mu_-5.5_t_70.npy"
+    # filename = complete_path+"/imag_time_evo_final_lambda_mu_-5.5_t_70.npy"
 
     complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=95'
+    # complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=70'
+
     filename = complete_path+"/imag_time_evo_final_lambda_mu_-5.1_t_95.npy"
-#     filename = complete_path+"real_time_evo_final_lambda_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
-
+    # filename = complete_path+"/imag_time_evo_final_lambda_mu_-5.5_t_70.npy"
+    # filename = complete_path+"real_time_evo_final_lambda_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
     # filename = "real_time_evo_final_lambda_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
-
     # lmbda = np.load("imag_time_evo_final_lambda_mu_-5.5_t_70.npy")
     lmbda = np.load(filename)
     print(lmbda.shape)
@@ -226,8 +229,8 @@ if __name__=="__main__":
     # gamma_b = torch.eye(2*N_b,dtype = torch.complex128)
 
     filename = complete_path+"/imag_time_evo_final_gamma_b_mu_-5.1_t_95.npy"
-#     filename = complete_path+"real_time_evo_final_gamma_b_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
-#     filename = "real_time_evo_final_gamma_b_mu_ini_-5.1_mu_final_-5.5_t_30.npy"
+    # filename = complete_path+"real_time_evo_final_gamma_b_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
+    # filename = "real_time_evo_final_gamma_b_mu_ini_-5.1_mu_final_-5.5_t_30.npy"
     # filename = complete_path+"/imag_time_evo_final_gamma_b_mu_-5.5_t_70.npy"
 
     gamma_b = np.load(filename)
@@ -238,9 +241,8 @@ if __name__=="__main__":
     # Get the random Gamma_m matrix
     # gamma_m = random_gamma_m_haar_distributed(N_f)
     filename = complete_path+"/imag_time_evo_final_gamma_m_mu_-5.1_t_95.npy"
-#     filename = complete_path+"real_time_evo_final_gamma_m_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
+    # filename = complete_path+"real_time_evo_final_gamma_m_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
     # filename = "real_time_evo_final_gamma_m_mu_ini_-5.1_mu_final_-5.5_t_30.npy"
-
     # filename = complete_path+"/imag_time_evo_final_gamma_m_mu_-5.5_t_70.npy"
     gamma_m = np.load(filename)
     gamma_m_tensor = torch.tensor(gamma_m,dtype=torch.complex128)

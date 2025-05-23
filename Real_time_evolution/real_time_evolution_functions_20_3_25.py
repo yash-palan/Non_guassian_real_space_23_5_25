@@ -43,7 +43,8 @@ def equation_of_motion_for_Non_Gaussian_parameter(delta_r:torch.Tensor,Gamma_b:t
     kappa_1_mat = hdm.rhs_var_par_eqn_of_motion_lambda_real_time(delta_r,Gamma_b,Gamma_m,input_variables,computed_variables,
                                                         correlation_matrices)           
 
-    print(" cond value for correlation matrix is : ", torch.linalg.cond(correlation_mat_for_non_gaussian_parameters))
+    # print(" cond value for correlation matrix is : ", torch.linalg.cond(correlation_mat_for_non_gaussian_parameters))
+    cdf.log_and_print(" cond value for correlation matrix is : "+str(torch.linalg.cond(correlation_mat_for_non_gaussian_parameters)) )
     # time_derivative_lambda_bar = torch.linalg.lstsq(correlation_mat_for_non_gaussian_parameters , kappa_1_mat, rcond = 1e-13, driver = 'gelss' )      
     time_derivative_lambda_bar = torch.linalg.lstsq(correlation_mat_for_non_gaussian_parameters.real , kappa_1_mat.real,
                                                     rcond = 1e-13, driver = 'gelss' )
