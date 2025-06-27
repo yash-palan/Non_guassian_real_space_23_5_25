@@ -118,8 +118,10 @@ if __name__=="__main__":
 
     # J_0_matrix = np.diag(np.ones(N_f)*J_0,1) + np.diag(np.ones(N_f)*J_0,-1)
     # omega_0 = 10*np.abs(J_0)
-    omega_0 = 0.2*np.abs(J_0)
-    # omega = 10*np.abs(J_0)*np.identity(N_b)
+    # omega_0 = 0.02*np.abs(J_0)
+    omega_0 = 0.5*np.abs(J_0)
+    # omega_0 = 0.05*np.abs(J_0)
+    # omega_0 = 0.8*np.abs(J_0)
     omega = omega_0*np.identity(N_b)
     omega_tensor = torch.tensor(omega,dtype=torch.complex128)
     # np.save("omega_matrix.npy",omega)
@@ -128,12 +130,16 @@ if __name__=="__main__":
     plt.title("omega")
     plt.colorbar()
     plt.show()
+    
     # Here, the gamma we give in is assumed to be normalised with the 1/sqrt{V} factor so that we 
     # work in the computational basis from the start
     # gamma_0 = 0.5*omega_0
+    # gamma_0 = 0.25*omega_0
+
     # gamma_0 = 0.1*omega_0
-    # gamma_0 = omega_0
-    gamma_0 = 0.6*omega_0
+    # gamma_0 = 0.25*omega_0
+    gamma_0 = 0.5*np.abs(J_0)
+    # gamma_0 = 0.1*omega_0
     # gamma_0 = 2*omega_0
     gamma = gamma_0*np.append(np.identity(N_b),np.identity(N_b),axis = 1)
     gamma_tensor = torch.tensor(gamma,dtype=torch.complex128)
@@ -154,12 +160,15 @@ if __name__=="__main__":
     # Initial chemical potential value
     # mu_ini = -5.5
     # mu_ini = -5.1
-    mu_ini = -5.1
+    # mu_ini = -5.1
+    mu_ini = -4.9
 
     # Final chemical potential value
     # chemical_potential_val = -5.0
     # chemical_potential_val = -4.5
-    chemical_potential_val = -5.5
+    # chemical_potential_val = -5.5
+    # chemical_potential_val = -0.1
+    chemical_potential_val = -1
     # chemical_potential_val = -5.5
 
 
@@ -171,15 +180,21 @@ if __name__=="__main__":
     # complete_path = base_path +"\\data\\Real time evolution\\omega_0_0.2_J_0\\mu_-5.1_to_-5.5\\gamma_0.5_omega_0\\t=10\\"
     # filename = complete_path+"/imag_time_evo_final_lambda_mu_-5.5_t_70.npy"
 
-    complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=95'
+    # complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=95'
+    complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=100'
     # complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=70'
 
-    filename = complete_path+"/imag_time_evo_final_lambda_mu_-5.1_t_95.npy"
+    # filename = complete_path+"/imag_time_evo_final_lambda_mu_-5.1_t_95.npy"
+    # filename = complete_path+"/imag_time_evo_final_lambda_mu_-5.1_t_95.npy"
     # filename = complete_path+"/imag_time_evo_final_lambda_mu_-5.5_t_70.npy"
     # filename = complete_path+"real_time_evo_final_lambda_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
     # filename = "real_time_evo_final_lambda_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
     # lmbda = np.load("imag_time_evo_final_lambda_mu_-5.5_t_70.npy")
-    lmbda = np.load(filename)
+    filename = complete_path+"/imag_time_evo_lambda_complete_mu_-4.9_t_100.npy"
+    lmbda_complete = np.load(filename)
+    
+    lmbda = np.reshape(lmbda_complete[390,:],(N_b,N_f) )  
+    # lmbda = np.load(filename)
     print(lmbda.shape)
     # lmbda = np.load("real_time_evo_final_lambda_mu_ini_-5.1_mu_final_-4.0_t_40.npy")
     lmbda_tensor = torch.tensor(lmbda,dtype=torch.complex128)
@@ -199,26 +214,18 @@ if __name__=="__main__":
 
     #region ############### Get the random initial matrices ###############
 
-    # Set the seed    
-    # seed = np.random.randint(0,1000)
-
-
     # Get the random initial matrices
 
     # Get the random delta_R matrix
-    # Delta_R = imf.initialise_delta_R_matrix(N_b,seed)
-    # Delta_R = np.load("imag_time_evo_final_delta_r_mu_-5.1_t_95.npy")
-    # Delta_R = np.load("imag_time_evo_final_delta_r_mu_-5.5_t_25.npy")
-    # Delta_R = np.load("imag_time_evo_final_delta_r_mu_-5.5_t_70.npy")
-
-    # Delta_R = np.load("real_time_evo_final_delta_r_mu_ini_-5.1_mu_final_-4.0_t_40.npy")
-    filename = complete_path+"/imag_time_evo_final_delta_r_mu_-5.1_t_95.npy"
-#     filename = complete_path+"real_time_evo_final_delta_r_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
+    # filename = complete_path+"/imag_time_evo_final_delta_r_mu_-5.1_t_95.npy"
+    # filename = complete_path+"real_time_evo_final_delta_r_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
     # filename = "real_time_evo_final_delta_r_mu_ini_-5.1_mu_final_-5.5_t_80.npy"
 
     # filename = complete_path+"/imag_time_evo_final_delta_r_mu_-5.5_t_70.npy"    
-#     filename = "real_time_evo_final_delta_r_mu_ini_-5.1_mu_final_-5.5_t_30.npy"
-    Delta_R = np.load(filename)
+    # filename = "real_time_evo_final_delta_r_mu_ini_-5.1_mu_final_-5.5_t_30.npy"
+    filename = complete_path+"/imag_time_evo_delta_r_complete_mu_-4.9_t_100.npy"
+    Delta_R_complete = np.load(filename)
+    Delta_R = np.reshape(Delta_R_complete[390,:],(2*N_b,) )
     Delta_R_tensor = torch.tensor(Delta_R,dtype=torch.complex128)
 
     # np.save("initial_delta_r_mu_"+str(chemical_potential_val)+".npy", Delta_R)
@@ -228,23 +235,28 @@ if __name__=="__main__":
     # gamma_b = np.matmul(S_b,S_b.T)
     # gamma_b = torch.eye(2*N_b,dtype = torch.complex128)
 
-    filename = complete_path+"/imag_time_evo_final_gamma_b_mu_-5.1_t_95.npy"
+    # filename = complete_path+"/imag_time_evo_final_gamma_b_mu_-5.1_t_95.npy"
     # filename = complete_path+"real_time_evo_final_gamma_b_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
     # filename = "real_time_evo_final_gamma_b_mu_ini_-5.1_mu_final_-5.5_t_30.npy"
     # filename = complete_path+"/imag_time_evo_final_gamma_b_mu_-5.5_t_70.npy"
+    filename = complete_path+"/imag_time_evo_gamma_b_complete_mu_-4.9_t_100.npy"
+    # gamma_b = np.load(filename)
 
-    gamma_b = np.load(filename)
+    gamma_b_complete = np.load(filename)
+    gamma_b = np.reshape(gamma_b_complete[390,:],(2*N_b,2*N_b) )
     gamma_b_tensor = torch.tensor(gamma_b,dtype=torch.complex128)
-
-
 
     # Get the random Gamma_m matrix
     # gamma_m = random_gamma_m_haar_distributed(N_f)
-    filename = complete_path+"/imag_time_evo_final_gamma_m_mu_-5.1_t_95.npy"
+    # filename = complete_path+"/imag_time_evo_final_gamma_m_mu_-5.1_t_95.npy"
     # filename = complete_path+"real_time_evo_final_gamma_m_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
     # filename = "real_time_evo_final_gamma_m_mu_ini_-5.1_mu_final_-5.5_t_30.npy"
     # filename = complete_path+"/imag_time_evo_final_gamma_m_mu_-5.5_t_70.npy"
-    gamma_m = np.load(filename)
+    filename = complete_path+"/imag_time_evo_gamma_m_complete_mu_-4.9_t_100.npy"
+    # gamma_m = np.load(filename)
+
+    gamma_m_complete = np.load(filename)
+    gamma_m = np.reshape(gamma_m_complete[390,:],(2*N_f,2*N_f) )
     gamma_m_tensor = torch.tensor(gamma_m,dtype=torch.complex128)
 
     ini_phase = 0
@@ -293,11 +305,14 @@ if __name__=="__main__":
     plt.title("Initial gamma_m matrix")
     plt.show()
 
-    plt.plot(lmbda)
-    plt.title("Initial lambda matrix")
-    plt.show()
+    # plt.plot(lmbda)
+    plt.pcolormesh(lmbda)
     plt.xlabel("Index")
-    plt.ylabel(r"$\lambda_q$")
+    plt.ylabel("Index")
+    plt.colorbar()
+    plt.title(r"$\lambda_q$")
+    plt.show()
+
     #endregion
 
     lambda_bar = lmbda
@@ -312,10 +327,11 @@ if __name__=="__main__":
     model_solve_ivp = real_time_evo_model_solve_ivp
 
     #region ############### Setting atolerance and rtolerance  ###############
-    # rtolerance = 1e-3
-    # atolerance = 1e-7
-    rtolerance = 1e-4
-    atolerance = 1e-8
+    rtolerance = 1e-3
+    atolerance = 1e-7
+
+    # rtolerance = 1e-4
+    # atolerance = 1e-8
 
     # rtolerance = 1e-2 
     # atolerance = 1e-6
@@ -345,8 +361,9 @@ if __name__=="__main__":
     Gamma_b_final = np.reshape(np.real(sol[-1,2*N_b:2*N_b +(2*N_b)*(2*N_b)]),(2*N_b,2*N_b) ) 
     delta_r_final = np.real(sol[-1,0:2*N_b])
     Gamma_m_final = np.reshape(np.real(sol[-1,2*N_b+(2*N_b)*(2*N_b):2*N_b+(2*N_b)*(2*N_b) + (2*N_f)*(2*N_f)] ),(2*N_f,2*N_f))
-
-    location = base_path + '/data/Real time evolution/'
+    lmbda_final = np.reshape(np.real(sol[-1,2*N_b+(2*N_b)*(2*N_b) + (2*N_f)*(2*N_f):-1] ),(N_b,N_f) ) 
+    
+    location = base_path + '/data/Real time evo/'
 
     np.save(location+'time_data.npy', sol_solve_ivp.t)
 
@@ -359,14 +376,14 @@ if __name__=="__main__":
             np.reshape( np.real(sol[-1,2*N_b+(2*N_b)*(2*N_b):2*N_b+(2*N_b)*(2*N_b) + (2*N_f)*(2*N_f)] ),(2*N_f,2*N_f) )   )
     # np.save('imag_time_evo_final_lambda_bar.npy', np.reshape(np.real(sol[-1,2*N_b+(2*N_b)*(2*N_b) + (2*N_f)*(2*N_f):] ),(N_b,N_f) )  )
     np.save(location+"real_time_evo_final_lambda_mu_ini_"+str(mu_ini)+"_mu_final_"+str(chemical_potential_val)+"_t_"+str(t_to_save)+".npy",
-            np.reshape(np.real(sol[-1,2*N_b+(2*N_b)*(2*N_b) + (2*N_f)*(2*N_f):-1] ),(N_b,N_f) )  )
+            lmbda_final)
     np.save(location+"real_time_evo_final_phase_mu_ini_"+str(mu_ini)+"_mu_final_"+str(chemical_potential_val)+"_t_"+str(t_to_save)+".npy",
             sol[-1] )
 
     Gamma_b_complete = np.real(sol[:,2*N_b:2*N_b +(2*N_b)*(2*N_b)]) 
     delta_r_complete = np.real(sol[:,0:2*N_b])
     Gamma_m_complete = np.real(sol[:,2*N_b+(2*N_b)*(2*N_b):2*N_b+(2*N_b)*(2*N_b) + (2*N_f)*(2*N_f)] )
-
+    lmbda_complete = np.real(sol[:,2*N_b+(2*N_b)*(2*N_b) + (2*N_f)*(2*N_f):-1] )
 
     np.save(location+"real_time_evo_delta_r_complete_mu_ini_"+str(mu_ini)+"_mu_final_"+str(chemical_potential_val)+"_t_"+str(t_to_save)+".npy",
             delta_r_complete)
@@ -375,7 +392,7 @@ if __name__=="__main__":
     np.save(location+"real_time_evo_gamma_m_complete_mu_ini_"+str(mu_ini)+"_mu_final_"+str(chemical_potential_val)+"_t_"+str(t_to_save)+".npy", 
             Gamma_m_complete )
     np.save(location+"real_time_evo_lambda_complete_mu_ini_"+str(mu_ini)+"_mu_final_"+str(chemical_potential_val)+"_t_"+str(t_to_save)+".npy", 
-            np.real(sol[:,2*N_b+(2*N_b)*(2*N_b) + (2*N_f)*(2*N_f):-1] ) )
+             lmbda_complete)
     np.save(location+"real_time_evo_phase_complete_mu_ini_"+str(mu_ini)+"_mu_final_"+str(chemical_potential_val)+"_t_"+str(t_to_save)+".npy", 
             sol[:,-1])
 
@@ -386,18 +403,24 @@ if __name__=="__main__":
     # Plotting gamma_b matrix
     plt.pcolormesh(Gamma_b_final)
     plt.colorbar()
-    plt.title("Final gamma_b matrix")
+    plt.title(r"Final $\Gamma_b$ matrix")
     plt.show()
 
     # Plotting delta_r matrix
     plt.plot(delta_r_final)
-    plt.title("Final delta_r matrix")
+    plt.title(r"Final $\Delta_r$ matrix")
     plt.show()
 
     # Plotting gamma_m matrix
     plt.pcolormesh(Gamma_m_final)
     plt.colorbar()
-    plt.title("Final gamma_m matrix")
+    plt.title(r"Final $\Gamma_m$ matrix")
     plt.show()
     #endregion
+
+    plt.pcolormesh(lmbda_final)
+    plt.colorbar()
+    plt.title(r"Final $\lambda_q$ matrix")
+    plt.show()
+
     print("\n Finally done")
