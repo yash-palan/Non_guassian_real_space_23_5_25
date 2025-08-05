@@ -57,7 +57,7 @@ class input_variables:
 
     """
     def __init__(self,fermionic_position_array:torch.Tensor,bosonic_position_array:torch.Tensor,fourier_array:torch.Tensor,
-                lmbda:torch.Tensor,J_0:torch.Tensor,gamma:torch.Tensor,omega:torch.Tensor,chemical_potential_val=0.0):
+                lmbda:torch.Tensor,J_0:torch.Tensor,gamma:torch.Tensor,omega:torch.Tensor,phonon_damping:torch.Tensor,chemical_potential_val=0.0):
         self.fermionic_position_array = fermionic_position_array
         self.bosonic_position_array = bosonic_position_array
         self.fourier_array = fourier_array
@@ -68,7 +68,7 @@ class input_variables:
         self.gamma = gamma          # Size : (N_b, N_f)  gamma = gamma_0 delta_{k,j}
         self.omega = omega          # Size : (N_b, N_b)
         self.chemical_potential_val = chemical_potential_val # Size : complex
-    
+        self.phonon_damping = phonon_damping
     def updating_lambda(self,lmbda:torch.Tensor)->None:
         """
 

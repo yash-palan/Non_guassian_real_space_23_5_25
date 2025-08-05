@@ -68,9 +68,9 @@ if __name__=="__main__":
     start_time = te.time()
 
     t_min = 0
-    t_max = 20
+    t_max = 40
 
-    t_to_save = 20
+    t_to_save = 40
 
     time = np.linspace(t_min, t_max, 201)         # Real/ Imaginary time used in the evolution equation
 
@@ -119,8 +119,8 @@ if __name__=="__main__":
     # J_0_matrix = np.diag(np.ones(N_f)*J_0,1) + np.diag(np.ones(N_f)*J_0,-1)
     # omega_0 = 10*np.abs(J_0)
     # omega_0 = 0.02*np.abs(J_0)
-    omega_0 = 0.5*np.abs(J_0)
-    # omega_0 = 0.05*np.abs(J_0)
+    # omega_0 = 0.5*np.abs(J_0)
+    omega_0 = 0.01*np.abs(J_0)
     # omega_0 = 0.8*np.abs(J_0)
     omega = omega_0*np.identity(N_b)
     omega_tensor = torch.tensor(omega,dtype=torch.complex128)
@@ -138,7 +138,7 @@ if __name__=="__main__":
 
     # gamma_0 = 0.1*omega_0
     # gamma_0 = 0.25*omega_0
-    gamma_0 = 0.5*np.abs(J_0)
+    gamma_0 = np.abs(J_0)
     # gamma_0 = 0.1*omega_0
     # gamma_0 = 2*omega_0
     gamma = gamma_0*np.append(np.identity(N_b),np.identity(N_b),axis = 1)
@@ -158,19 +158,37 @@ if __name__=="__main__":
 
 
     # Initial chemical potential value
-    # mu_ini = -5.5
+    mu_ini = -5.5
     # mu_ini = -5.1
     # mu_ini = -5.1
-    mu_ini = -4.9
+#     mu_ini = -4.9
 
     # Final chemical potential value
     # chemical_potential_val = -5.0
     # chemical_potential_val = -4.5
     # chemical_potential_val = -5.5
     # chemical_potential_val = -0.1
+#     chemical_potential_val = -1
     chemical_potential_val = -1
+
+    # chemical_potential_val = -2    # Just to increase my filling so that I have a SC ground state. 
+
     # chemical_potential_val = -5.5
 
+    # phonon_damping_0 = 0.1*omega_0	
+    # phonon_damping_0 = omega_0	
+    phonon_damping_0 = 0.0*np.abs(J_0)
+
+    # phonon_damping_0 = 3*omega_0	
+
+    phonon_damping = phonon_damping_0*np.identity(N_b)
+    phonon_damping_tensor = torch.tensor(phonon_damping,dtype=torch.complex128)
+    # phonon_damping_tensor = phonon_damping_0*torch.ones_like(omega_tensor)
+    phonon_damping = np.array(phonon_damping_tensor)
+    plt.pcolormesh(phonon_damping.real)
+    plt.title("phonon damping")
+    plt.colorbar()
+    plt.show()
 
     # lmbda = np.append(lmbda_spin_removed,lmbda_spin_removed,axis=1)
     base_path = os.getcwd()
@@ -181,7 +199,9 @@ if __name__=="__main__":
     # filename = complete_path+"/imag_time_evo_final_lambda_mu_-5.5_t_70.npy"
 
     # complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=95'
-    complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=100'
+#     complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=100'
+    complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=50'
+
     # complete_path = base_path + '/data/Imaginary time evolution/mu='+str(mu_ini)+'/t=70'
 
     # filename = complete_path+"/imag_time_evo_final_lambda_mu_-5.1_t_95.npy"
@@ -190,10 +210,12 @@ if __name__=="__main__":
     # filename = complete_path+"real_time_evo_final_lambda_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
     # filename = "real_time_evo_final_lambda_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
     # lmbda = np.load("imag_time_evo_final_lambda_mu_-5.5_t_70.npy")
-    filename = complete_path+"/imag_time_evo_lambda_complete_mu_-4.9_t_100.npy"
+    # filename = complete_path+"/imag_time_evo_lambda_complete_mu_-4.9_t_100.npy"
+    filename = complete_path+"/imag_time_evo_lambda_complete_mu_-5.5_t_50.npy"
     lmbda_complete = np.load(filename)
     
-    lmbda = np.reshape(lmbda_complete[390,:],(N_b,N_f) )  
+    # lmbda = np.reshape(lmbda_complete[390,:],(N_b,N_f) )  
+    lmbda = np.reshape(lmbda_complete[30,:],(N_b,N_f) )  
     # lmbda = np.load(filename)
     print(lmbda.shape)
     # lmbda = np.load("real_time_evo_final_lambda_mu_ini_-5.1_mu_final_-4.0_t_40.npy")
@@ -207,11 +229,21 @@ if __name__=="__main__":
     fourier_transform_matrix_tensor = torch.tensor(fourier_transform_matrix,dtype=torch.complex128)
 
     initial_input_variables = cdf.input_variables(position_space_grid_tensor,boson_space_grid_tensor,fourier_transform_matrix_tensor,
-                                                    lmbda_tensor,J_0_tensor,gamma_tensor,omega_tensor,chemical_potential_val)
+                                                    lmbda_tensor,J_0_tensor,gamma_tensor,omega_tensor,phonon_damping_tensor,chemical_potential_val)
 
     print(" Input variables instance created")    
 
+    #region ############### Saving readme for this run ###############
 
+    with open('data/readme_initial_parameters.dat',mode='a') as file:
+        file.write(f"J_0 ={J_0}")
+        file.write(f"\nomega_0 ={omega_0}")
+        file.write(f"\ngamma_0 ={gamma_0}")
+        file.write(f"\nchemical potential initial ={mu_ini}")
+        file.write(f"\nchemical potential final ={chemical_potential_val}")
+        file.write(f"\ndamping strength ={phonon_damping_0}")
+        file.close()
+    
     #region ############### Get the random initial matrices ###############
 
     # Get the random initial matrices
@@ -223,9 +255,11 @@ if __name__=="__main__":
 
     # filename = complete_path+"/imag_time_evo_final_delta_r_mu_-5.5_t_70.npy"    
     # filename = "real_time_evo_final_delta_r_mu_ini_-5.1_mu_final_-5.5_t_30.npy"
-    filename = complete_path+"/imag_time_evo_delta_r_complete_mu_-4.9_t_100.npy"
+    # filename = complete_path+"/imag_time_evo_delta_r_complete_mu_-4.9_t_100.npy"
+    filename = complete_path+"/imag_time_evo_delta_r_complete_mu_-5.5_t_50.npy"
     Delta_R_complete = np.load(filename)
-    Delta_R = np.reshape(Delta_R_complete[390,:],(2*N_b,) )
+    # Delta_R = np.reshape(Delta_R_complete[390,:],(2*N_b,) )
+    Delta_R = np.reshape(Delta_R_complete[30,:],(2*N_b,) )
     Delta_R_tensor = torch.tensor(Delta_R,dtype=torch.complex128)
 
     # np.save("initial_delta_r_mu_"+str(chemical_potential_val)+".npy", Delta_R)
@@ -239,11 +273,13 @@ if __name__=="__main__":
     # filename = complete_path+"real_time_evo_final_gamma_b_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
     # filename = "real_time_evo_final_gamma_b_mu_ini_-5.1_mu_final_-5.5_t_30.npy"
     # filename = complete_path+"/imag_time_evo_final_gamma_b_mu_-5.5_t_70.npy"
-    filename = complete_path+"/imag_time_evo_gamma_b_complete_mu_-4.9_t_100.npy"
+    # filename = complete_path+"/imag_time_evo_gamma_b_complete_mu_-4.9_t_100.npy"
+    filename = complete_path+"/imag_time_evo_gamma_b_complete_mu_-5.5_t_50.npy"
     # gamma_b = np.load(filename)
 
     gamma_b_complete = np.load(filename)
-    gamma_b = np.reshape(gamma_b_complete[390,:],(2*N_b,2*N_b) )
+    # gamma_b = np.reshape(gamma_b_complete[390,:],(2*N_b,2*N_b) )
+    gamma_b = np.reshape(gamma_b_complete[30,:],(2*N_b,2*N_b) )           #mu =-5.5 , t=50
     gamma_b_tensor = torch.tensor(gamma_b,dtype=torch.complex128)
 
     # Get the random Gamma_m matrix
@@ -252,11 +288,13 @@ if __name__=="__main__":
     # filename = complete_path+"real_time_evo_final_gamma_m_mu_ini_-5.1_mu_final_-5.5_t_10.npy"
     # filename = "real_time_evo_final_gamma_m_mu_ini_-5.1_mu_final_-5.5_t_30.npy"
     # filename = complete_path+"/imag_time_evo_final_gamma_m_mu_-5.5_t_70.npy"
-    filename = complete_path+"/imag_time_evo_gamma_m_complete_mu_-4.9_t_100.npy"
+    # filename = complete_path+"/imag_time_evo_gamma_m_complete_mu_-4.9_t_100.npy"
+    filename = complete_path+"/imag_time_evo_gamma_m_complete_mu_-5.5_t_50.npy"
     # gamma_m = np.load(filename)
 
     gamma_m_complete = np.load(filename)
-    gamma_m = np.reshape(gamma_m_complete[390,:],(2*N_f,2*N_f) )
+    # gamma_m = np.reshape(gamma_m_complete[390,:],(2*N_f,2*N_f) )
+    gamma_m = np.reshape(gamma_m_complete[30,:],(2*N_f,2*N_f) )
     gamma_m_tensor = torch.tensor(gamma_m,dtype=torch.complex128)
 
     ini_phase = 0
@@ -332,6 +370,9 @@ if __name__=="__main__":
 
     # rtolerance = 1e-4
     # atolerance = 1e-8
+    
+    # rtolerance = 1e-5
+    # atolerance = 1e-9
 
     # rtolerance = 1e-2 
     # atolerance = 1e-6
@@ -363,9 +404,10 @@ if __name__=="__main__":
     Gamma_m_final = np.reshape(np.real(sol[-1,2*N_b+(2*N_b)*(2*N_b):2*N_b+(2*N_b)*(2*N_b) + (2*N_f)*(2*N_f)] ),(2*N_f,2*N_f))
     lmbda_final = np.reshape(np.real(sol[-1,2*N_b+(2*N_b)*(2*N_b) + (2*N_f)*(2*N_f):-1] ),(N_b,N_f) ) 
     
-    location = base_path + '/data/Real time evo/'
+    # location = base_path + '/data/Real time evo/'
+    location = base_path + '/data/damped real time evo_model 1/'
 
-    np.save(location+'time_data.npy', sol_solve_ivp.t)
+    np.save(location+'time_data.npy', sol_solve_ivp.t + t_to_save-(t_max-t_min))
 
     #  Saving to numpy files (for speed, hopefully? )
     np.save(location+"real_time_evo_final_delta_r_mu_ini_"+str(mu_ini)+"_mu_final_"+str(chemical_potential_val)+"_t_"+str(t_to_save)+".npy",

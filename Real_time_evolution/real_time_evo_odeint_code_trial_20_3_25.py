@@ -21,7 +21,11 @@ from Common_codes.class_defn_file_20_3_25 import log_and_print
 from Common_codes import correlation_functions_file_20_3_25 as cf
 from Common_codes import hamiltonian_derivative_matrices_20_3_25 as hdm
 from Common_codes import file_with_checks_20_3_25 as fwc
+from Common_codes import damped_hamiltonian_codes as dhc
+from Real_time_evolution import damped_real_time_functions_27_6_25 as drtf
 # import csv
+import matplotlib.pyplot as plt
+# import seaborn as sns
 import pandas as pd
 ##############################################################################
 ##############################################################################
@@ -90,12 +94,24 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
 
     # Initialising the c_c correlation matrices
     correlation_matrices =cf.correlation_functions(Gamma_m,N_f)
+    
     # start_time = time.time()
     # Equation of motion for lambda_bar
-    print(" chemical potential:",input_variables.chemical_potential_val)
-    with open('data/jobscript.dat','a') as file:
-        file.write(" chemical potential:"+str(input_variables.chemical_potential_val)+"\n")
+    # print(" chemical potential:",input_variables.chemical_potential_val)
+    # with open('data/jobscript.dat','a') as file:
+    #     file.write(" chemical potential:"+str(input_variables.chemical_potential_val)+"\n")
     # start_time = time.time()
+
+    # damped_hamiltonian_calcs = dhc.damped_hamiltonian_model_2(input_variables.phonon_damping,correlation_matrices,
+    #                                                   N_b,N_f)
+    # damped_hamiltonian_calcs = dhc.damped_hamiltonian_model_3(input_variables.phonon_damping,correlation_matrices,
+    #                                                   N_b,N_f)
+    # damped_hamiltonian_calcs = dhc.damped_hamiltonian_model_4(input_variables.phonon_damping,correlation_matrices,
+    #                                                   N_b,N_f)
+    damped_hamiltonian_calcs = dhc.damped_hamiltonian_model_1(input_variables.phonon_damping,correlation_matrices,
+                                                      N_b,N_f)
+    damped_hamiltonian_calcs.initialise_and_extract_data(delta_r=delta_R,Gamma_b=Gamma_b,
+                                                         Gamma_m=Gamma_m,lmbda = lambda_bar)
 
     # Equation of motion for phase_val
     phase_time_derivative = hdm.energy_expectation_value(delta_R,Gamma_b,Gamma_m,
@@ -126,6 +142,9 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
                                                                 input_variables,
                                                                 computed_variables_instance,
                                                                 correlation_matrices)
+    damped_contribution_delta_R_dt = drtf.damped_term_equation_of_motion_for_bosonic_averages(delta_R, Gamma_b, Gamma_m, time_derivative_lambda,
+                                                                                              damped_hamiltonian_calcs    )
+    d_delta_R_dt  = d_delta_R_dt + damped_contribution_delta_R_dt
 
     phase_time_derivative += phase_contribution_1
     del phase_contribution_1
@@ -137,6 +156,10 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
                                                                 computed_variables_instance,
                                                                 correlation_matrices)  
     phase_time_derivative += phase_contribution_2
+    damped_contribution_gamma_b_dt = drtf.damped_term_equation_of_motion_for_bosonic_covariances(delta_R, Gamma_b, Gamma_m, time_derivative_lambda,
+                                                                                              damped_hamiltonian_calcs    )
+
+    d_Gamma_b_dt += damped_contribution_gamma_b_dt
 
     del phase_contribution_2
     
@@ -147,7 +170,9 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
                                                                 computed_variables_instance,
                                                                 correlation_matrices)   
     phase_time_derivative += phase_contribution_3
-
+    damped_contribution_gamma_m_dt = drtf.damped_term_equation_of_motion_for_fermionic_covariance(delta_R, Gamma_b, Gamma_m, time_derivative_lambda,
+                                                                                              damped_hamiltonian_calcs    )
+    d_Gamma_m_dt += damped_contribution_gamma_m_dt
     del phase_contribution_3
     
     # append_to_hdf5(d_delta_R_dt,"d_delta_R_time_evo"+"_mu_final_"+str(input_variables.chemical_potential_val)+".h5")

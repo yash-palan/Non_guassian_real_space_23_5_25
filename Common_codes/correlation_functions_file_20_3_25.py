@@ -40,7 +40,7 @@ class correlation_functions:
         self.density_density_anticommutator_connected_correlation_mat = self.density_density_anticommutator_connected_correlation_matrix_creation(Gamma_m, N_f)
     
     def c_dagger_c_expectation_value_matrix_creation(self,Gamma_m:torch.Tensor,N_f:int)->torch.Tensor:
-            """
+        """
             -----------------------------
             -----------------------------
             DESCRIPTION
@@ -57,8 +57,8 @@ class correlation_functions:
             Size : N_f x N_f
         
             """
-            # Remark: Yash : 6/9/24 : This expression is correct
-            return(0.25*(2*torch.eye(N_f,dtype=torch.complex128) - 1j*(Gamma_m[0:N_f,0:N_f] + Gamma_m[N_f:,N_f:] ) + Gamma_m[0:N_f,N_f:] - Gamma_m[N_f:,0:N_f] ) ) 
+        # Remark: Yash : 6/9/24 : This expression is correct
+        return(0.25*(2*torch.eye(N_f,dtype=torch.complex128) - 1j*(Gamma_m[0:N_f,0:N_f] + Gamma_m[N_f:,N_f:] ) + Gamma_m[0:N_f,N_f:] - Gamma_m[N_f:,0:N_f] ) ) 
             
     def c_c_dagger_expectation_value_matrix_creation(self,Gamma_m:torch.Tensor,N_f)->torch.Tensor:
         """
