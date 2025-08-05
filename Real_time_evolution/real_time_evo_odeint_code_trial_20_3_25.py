@@ -21,49 +21,21 @@ from Common_codes.class_defn_file_20_3_25 import log_and_print
 from Common_codes import correlation_functions_file_20_3_25 as cf
 from Common_codes import hamiltonian_derivative_matrices_20_3_25 as hdm
 from Common_codes import file_with_checks_20_3_25 as fwc
+from Common_codes import damped_hamiltonian_codes as dhc
+from Real_time_evolution import damped_real_time_functions_27_6_25 as drtf
 # import csv
+import matplotlib.pyplot as plt
+# import seaborn as sns
 import pandas as pd
 ##############################################################################
 ##############################################################################
-# def create_hdf5_file(filename):
-#     with h5py.File(filename, "w") as f:
-#         # Create a dataset with maxshape=(None,) so it can grow
-#         f.create_dataset("time_series_real", shape=(0,0), maxshape=(None,None), dtype="f8")
-#         f.create_dataset("time_series_imag", shape=(0,0), maxshape=(None,None), dtype="f8")
-#         print("HDF5 file initialized.")
-
-# # Function to append data to the existing dataset
-# def append_to_hdf5(new_data,filename):
-#     with h5py.File(filename, "a") as f:
-#         # Note that the first dimension is the value of parameter, i.e. dset[:,1] is the value of the data at time t=1
-
-#         dset_real = f["time_series_real"]
-#         dset_imag = f["time_series_imag"]
-#         old_size = dset_real.shape[1]  # Get the current size
-#         if(dset_real.shape[1] == 0):
-#             dset_real.resize((len(new_data),1))
-#             dset_imag.resize((len(new_data),1))
-
-#             dset_real[:,0] = new_data.real  # Append new data
-#             dset_imag[:,0] = new_data.imag  # Append new data
-#             # print(f"Appended {len(new_data)} entries to the dataset.") 
-#         else:
-#             second_size = dset_real.shape[0]  # Get the current size
-#             new_size = old_size + 1  # Calculate new size
-#             dset_real.resize((second_size,new_size))  # Resize the dataset
-#             dset_imag.resize((second_size,new_size))  # Resize the dataset
-#             dset_real[:,new_size-1] = new_data.real  # Append new data
-#             dset_imag[:,new_size-1] = new_data.imag  # Append new data
-#             # print(f"Appended {len(new_data)} entries to the dataset.")
-#     return
-
 def write_to_excel(filename,data):
     df = pd.DataFrame(data)
     df.to_excel(filename,index=False, header=False)
     return
 
 def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_variables)->np.ndarray:
-    print(" Started time =",t,".")
+    print("\n Started time =",t,".")
     with open('data/jobscript.dat','a') as file:
         file.write("\n Started time ="+str(t)+".\n")
     # Defining some basic quantities that we use repeatedly in this file N_b and N_f 
@@ -89,12 +61,9 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
         lambda_bar = y[((2*N_f)*(2*N_f)+2*N_b*2*N_b+2*N_b):-1]
         phase_val = y[-1]
 
-    # append_to_hdf5(delta_R,"delta_R_time_evo"+"_mu_final_"+str(input_variables.chemical_potential_val)+".h5")
-    # append_to_hdf5(Gamma_b,"gamma_b_time_evo"+"_mu_final_"+str(input_variables.chemical_potential_val)+".h5")
-    # append_to_hdf5(Gamma_m,"gamma_m_time_evo"+"_mu_final_"+str(input_variables.chemical_potential_val)+".h5")
-    # append_to_hdf5(lambda_bar,"lambda_time_evo"+"_mu_final_"+str(input_variables.chemical_potential_val)+".h5")
     
     delta_R = torch.tensor( delta_R  ,dtype=torch.complex128)
+
     # Reshaping the flattened Gamma_b array to a 2N_bx2N_b
     Gamma_b = torch.tensor(np.reshape(Gamma_b,(2*N_b,2*N_b))    ,dtype=torch.complex128)
     
@@ -103,18 +72,11 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
 
     lambda_bar = torch.tensor(np.reshape(lambda_bar,(N_b,N_f)),dtype=torch.complex128) 
 
-    # Storting so that I can observe how things are changing
-    # write_to_excel("delta_r.xlsx",delta_R)
-    # write_to_excel("gamma_m.xlsx",Gamma_m)
-    # write_to_excel("gamma_b.xlsx",Gamma_b)
-    # write_to_excel("lambda_bar.xlsx",lambda_bar)
-
     # Initialising the lambda in input variable variables 
     input_variables.updating_lambda(lambda_bar)
     
     # Initialising the computational_variables class
     computed_variables_instance = cdf.computed_variables(N_b,N_f)
-    
     
     # Checking if the arrays the required properties
     fwc.check_bosonic_quadrature_average_matrix(delta_R)
@@ -132,13 +94,25 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
 
     # Initialising the c_c correlation matrices
     correlation_matrices =cf.correlation_functions(Gamma_m,N_f)
+    
     # start_time = time.time()
     # Equation of motion for lambda_bar
-    print(" chemical potential:",input_variables.chemical_potential_val)
-    with open('data/jobscript.dat','a') as file:
-        file.write(" chemical potential:"+str(input_variables.chemical_potential_val)+"\n")
+    # print(" chemical potential:",input_variables.chemical_potential_val)
+    # with open('data/jobscript.dat','a') as file:
+    #     file.write(" chemical potential:"+str(input_variables.chemical_potential_val)+"\n")
     # start_time = time.time()
-    # Equation of motion for lambda_bar
+
+    # damped_hamiltonian_calcs = dhc.damped_hamiltonian_model_2(input_variables.phonon_damping,correlation_matrices,
+    #                                                   N_b,N_f)
+    # damped_hamiltonian_calcs = dhc.damped_hamiltonian_model_3(input_variables.phonon_damping,correlation_matrices,
+    #                                                   N_b,N_f)
+    # damped_hamiltonian_calcs = dhc.damped_hamiltonian_model_4(input_variables.phonon_damping,correlation_matrices,
+    #                                                   N_b,N_f)
+    damped_hamiltonian_calcs = dhc.damped_hamiltonian_model_1(input_variables.phonon_damping,correlation_matrices,
+                                                      N_b,N_f)
+    damped_hamiltonian_calcs.initialise_and_extract_data(delta_r=delta_R,Gamma_b=Gamma_b,
+                                                         Gamma_m=Gamma_m,lmbda = lambda_bar)
+
     # Equation of motion for phase_val
     phase_time_derivative = hdm.energy_expectation_value(delta_R,Gamma_b,Gamma_m,
                             input_variables,
@@ -149,10 +123,15 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
     print(" Energy expectation value:",phase_time_derivative,'\n')
     with open('data/jobscript.dat','a') as file:
         file.write(" Energy expectation value:"+str(phase_time_derivative.item().real)+'\n')
+
+    # Equation of motion for lambda_bar
     time_derivative_lambda= rtef.equation_of_motion_for_Non_Gaussian_parameter(delta_R,Gamma_b,Gamma_m,
                                                                                 input_variables,
                                                                                 computed_variables_instance,
                                                                                 correlation_matrices)
+    # time_derivative_lambda = torch.zeros_like(lambda_bar,dtype=torch.complex128)
+
+
     if(time_derivative_lambda.dtype !=torch.complex128):
         raise Exception("The time_derivative_lambda is not a complex tensor.")
     
@@ -163,6 +142,9 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
                                                                 input_variables,
                                                                 computed_variables_instance,
                                                                 correlation_matrices)
+    damped_contribution_delta_R_dt = drtf.damped_term_equation_of_motion_for_bosonic_averages(delta_R, Gamma_b, Gamma_m, time_derivative_lambda,
+                                                                                              damped_hamiltonian_calcs    )
+    d_delta_R_dt  = d_delta_R_dt + damped_contribution_delta_R_dt
 
     phase_time_derivative += phase_contribution_1
     del phase_contribution_1
@@ -174,6 +156,10 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
                                                                 computed_variables_instance,
                                                                 correlation_matrices)  
     phase_time_derivative += phase_contribution_2
+    damped_contribution_gamma_b_dt = drtf.damped_term_equation_of_motion_for_bosonic_covariances(delta_R, Gamma_b, Gamma_m, time_derivative_lambda,
+                                                                                              damped_hamiltonian_calcs    )
+
+    d_Gamma_b_dt += damped_contribution_gamma_b_dt
 
     del phase_contribution_2
     
@@ -184,7 +170,9 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
                                                                 computed_variables_instance,
                                                                 correlation_matrices)   
     phase_time_derivative += phase_contribution_3
-
+    damped_contribution_gamma_m_dt = drtf.damped_term_equation_of_motion_for_fermionic_covariance(delta_R, Gamma_b, Gamma_m, time_derivative_lambda,
+                                                                                              damped_hamiltonian_calcs    )
+    d_Gamma_m_dt += damped_contribution_gamma_m_dt
     del phase_contribution_3
     
     # append_to_hdf5(d_delta_R_dt,"d_delta_R_time_evo"+"_mu_final_"+str(input_variables.chemical_potential_val)+".h5")
@@ -249,7 +237,7 @@ def real_time_evo_model_solve_ivp(t,y:np.ndarray,input_variables:cdf.input_varia
     # dydt = np.concatenate((d_delta_R_dt,d_Gamma_b_dt,d_Gamma_m_dt,time_derivative_lambda_bar))
     dydt = np.concatenate((d_delta_R_dt,d_Gamma_b_dt,d_Gamma_m_dt,time_derivative_lambda_np_array,np.array([phase_time_derivative])))
     gc.collect()
-    log_and_print("Completed time "+str(t))
+    log_and_print(" Completed time "+str(t))
     # print(" Completed time =",t,".\n")
 
     return dydt

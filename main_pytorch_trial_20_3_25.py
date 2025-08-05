@@ -34,11 +34,11 @@ if __name__=="__main__":
     start_time = te.time()
 
     t_min = 0
-    t_max = 20
+    t_max = 50
     
-    t_to_save = 70
+    t_to_save = 100
 
-    time = np.linspace(t_min, t_max, 101)         # Real/ Imaginary time used in the evolution equation
+    time = np.linspace(t_min, t_max, 501)         # Real/ Imaginary time used in the evolution equation
 
     t_span = (t_min,t_max)
 
@@ -107,16 +107,16 @@ if __name__=="__main__":
     # normalisation issues
     
     # lmbda = gamma_0/omega_0*np.random.rand(N_b,N_f)
-    # lmbda = np.load("imag_time_evo_final_lambda_mu_-5.5_t_25.npy")
+    lmbda = np.load("imag_time_evo_final_lambda_mu_-4.9_t_50.npy")
     # lmbda_spin_removed = np.load("imag_time_evo_final_lambda_mu_-5.5_t_50.npy")    
     # lmbda = np.append(lmbda_spin_removed,lmbda_spin_removed,axis=1)
-    lmbda = np.load("imag_time_evo_final_lambda_mu_-5.5_t_50.npy")
+    # lmbda = np.load("imag_time_evo_final_lambda_mu_-5.5_t_50.npy")
     print(lmbda.shape)    
     lmbda_tensor = torch.tensor(lmbda,dtype=torch.complex128)
 
-    # chemical_potential_val = -5.0
+    chemical_potential_val = -4.9
     # chemical_potential_val = -4.5
-    chemical_potential_val = -5.5
+    # chemical_potential_val = -5.5
 
     #endregion
       
@@ -140,7 +140,7 @@ if __name__=="__main__":
 
     # Get the random delta_R matrix
     # Delta_R = imf.initialise_delta_R_matrix(N_b,seed)
-    Delta_R = np.load("imag_time_evo_final_delta_r_mu_-5.5_t_50.npy")
+    Delta_R = np.load("imag_time_evo_final_delta_r_mu_-4.9_t_50.npy")
     # Delta_R = np.load("delta_r_issue.npy")
     Delta_R_tensor = torch.tensor(Delta_R,dtype=torch.complex128)
 
@@ -150,7 +150,7 @@ if __name__=="__main__":
     # S_b = tw.random.random_symplectic(N_b) # type: ignore
     # gamma_b = np.matmul(S_b,S_b.T)
     
-    gamma_b = np.load("imag_time_evo_final_gamma_b_mu_-5.5_t_50.npy")
+    gamma_b = np.load("imag_time_evo_final_gamma_b_mu_-4.9_t_50.npy")
     # gamma_b = np.eye(2*N_b)
     # gamma_b = np.load("Gamma_b_issue.npy")
     gamma_b_tensor = torch.tensor(gamma_b,dtype=torch.complex128)
@@ -160,7 +160,7 @@ if __name__=="__main__":
 
     # Get the random Gamma_m matrix
     # gamma_m = random_gamma_m_haar_distributed(N_f)
-    gamma_m = np.load("imag_time_evo_final_gamma_m_mu_-5.5_t_50.npy")
+    gamma_m = np.load("imag_time_evo_final_gamma_m_mu_-4.9_t_50.npy")
     # gamma_m = np.load("Gamma_m_issue.npy")
     gamma_m_tensor = torch.tensor(gamma_m,dtype=torch.complex128)
 
@@ -200,11 +200,12 @@ if __name__=="__main__":
     plt.title("Initial gamma_m matrix")
     plt.show()
 
-    plt.plot(np.array(lmbda).real)
-    plt.title("Initial lambda matrix")
+    plt.pcolormesh(np.array(lmbda).real)
+    plt.title(r"Initial $\lambda_q$")
+    plt.colorbar()
     plt.show()
-    plt.xlabel("Index")
-    plt.ylabel(r"$\lambda_q$")
+    # plt.xlabel("Index")
+    # plt.ylabel()
     #endregion
 
     lambda_bar = lmbda
@@ -222,14 +223,14 @@ if __name__=="__main__":
     # rtolerance = 1e-4
     # atolerance = 1e-7
 
-    # rtolerance = 1e-3
-    # atolerance = 1e-7
+    rtolerance = 1e-3
+    atolerance = 1e-7
 
     # rtolerance = 1e-5
     # atolerance = 1e-8
 
-    rtolerance = 1e-2 
-    atolerance = 1e-6
+    # rtolerance = 1e-2 
+    # atolerance = 1e-6
     #endregion
 
     #region ############### Numerically time evolving the ODE ###############

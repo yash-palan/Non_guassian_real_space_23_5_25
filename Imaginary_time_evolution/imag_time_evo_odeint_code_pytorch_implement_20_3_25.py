@@ -16,11 +16,11 @@ import torch
 from Common_codes import file_with_checks_20_3_25 as fwc
 from scipy.integrate import odeint
 import numpy as np
+from Common_codes.generic_codes_20_3_25 import delta
 from Imaginary_time_evolution import imaginary_time_evolution_functions_pytorch_implement_20_3_25 as itef
 from Common_codes import class_defn_file_20_3_25 as cdf
 from Common_codes import correlation_functions_file_20_3_25 as cf
-# from Common_codes import file_with_checks as fwc
-
+from Common_codes import hamiltonian_derivative_matrices_20_3_25 as hdm 
 ##############################################################################
 ##############################################################################
 
@@ -44,7 +44,9 @@ def imag_time_evo_model_solve_ivp(t:np.ndarray,y:np.ndarray,input_variables:cdf.
         in a vector (in the above mentioned order).
 
     """    
-    print(" Started time =",t,".")
+    print("\n Started time =",t,".")
+    with open('data/jobscript.dat','a') as file:
+        file.write("\n Started time ="+str(t)+".\n")
     
     # Defining some basic quantities that we use repeatedly in this file N_b and N_f 
     N_b = input_variables.N_b
@@ -76,7 +78,7 @@ def imag_time_evo_model_solve_ivp(t:np.ndarray,y:np.ndarray,input_variables:cdf.
     fwc.check_bosonic_quadrature_covariance_matrix(Gamma_b)
     fwc.check_majorana_covariance_matrix(Gamma_m)   
     fwc.check_bosonic_quadrature_average_matrix(delta_R)
-
+  
     # Initialising the lambda in input variable variables 
     input_variables.updating_lambda(lambda_bar)
     
@@ -89,8 +91,12 @@ def imag_time_evo_model_solve_ivp(t:np.ndarray,y:np.ndarray,input_variables:cdf.
     # Initialising the c_c correlation matrices
     correlation_matrices =cf.correlation_functions(Gamma_m,N_f)
     # start_time = time.time()
+
+    # Computation of eneergy
+    energy = hdm.energy_expectation_value(delta_R, Gamma_b, Gamma_m, input_variables, 
+                                          computed_variables_instance,correlation_matrices)
+    print(" Energy:",energy)
     # Equation of motion for lambda_bar
-    
     time_derivative_lambda= itef.equation_of_motion_for_Non_Gaussian_parameter(delta_R,Gamma_b,Gamma_m,
                                                                                 input_variables,
                                                                                 computed_variables_instance,
@@ -140,10 +146,6 @@ def imag_time_evo_model_solve_ivp(t:np.ndarray,y:np.ndarray,input_variables:cdf.
         if(torch.any(torch.imag(time_derivative_lambda)>1e-4)):
             np.save("lambda_issue.npy",lambda_bar)
             raise Exception("The time_derivative_lambda has a large imaginary part.")
-    # Taking the real parts since all of the terms are real valued (and so any complex part should be due to numerical errors)
-    # d_delta_R_dt = torch.real(d_delta_R_dt)     
-    # d_Gamma_b_dt = torch.real(d_Gamma_b_dt)
-    # d_Gamma_m_dt = torch.real(d_Gamma_m_dt)
     
     # Remember that time derivatives are torch tensors and need to be converted to a numpy arrays
     d_delta_R_dt = np.real(np.array(d_delta_R_dt))

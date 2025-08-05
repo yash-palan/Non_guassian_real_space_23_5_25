@@ -78,7 +78,7 @@ def equation_of_motion_for_bosonic_averages(delta_r:torch.Tensor,Gamma_b:torch.T
     sigma = torch.from_numpy(np.kron([[0,1],[-1,0]],np.eye(N_b))).to(torch.complex128)
     h_delta_matrix = hdm.h_delta(delta_r,Gamma_b,Gamma_m,input_variables,computed_variables,correlation_matrices)
     O_delta_mat = ngtd.O_delta(time_derivative_lambda_bar,Gamma_m,input_variables,correlation_matrices)
-    h_delta_t_matrix = h_delta_matrix- 1j*O_delta_mat
+    h_delta_t_matrix = h_delta_matrix - 1j*O_delta_mat
     # sigma = np.kron([[0,1],[-1,0]],np.eye(N_b))
 
     # h_delta_matrix = gf.h_delta(delta_r,Gamma_b,Gamma_m,input_variables,computed_variables)
@@ -139,7 +139,7 @@ def equation_of_motion_for_fermionic_covariance(delta_r:torch.Tensor,Gamma_b:tor
     """
     h_m_matrix = hdm.h_m(delta_r,Gamma_b,Gamma_m,input_variables,computed_variables,correlation_matrices)
     O_m_matrix = ngtd.O_m(time_derivative_lambda_bar,delta_r,input_variables,correlation_matrices)
-    h_m_t_matrix = h_m_matrix- 1j*O_m_matrix
+    h_m_t_matrix = h_m_matrix - 1j*O_m_matrix
 
     final_mat = torch.matmul(h_m_t_matrix, Gamma_m) - torch.matmul( Gamma_m,h_m_t_matrix) 
 
